@@ -22,6 +22,7 @@ public class Optional_Intro {
 //    So they might get their own share of null point or exception because,
 //    they might not be aware of the the No coming back.
     System.out.println(getDiscountLine(new Customer(new MemberCard("bar", 10))));
+    System.out.println(getDiscountLine(new Customer()));
   }
 
   public static String getDiscountLine(Customer customer) {
@@ -61,6 +62,9 @@ public class Optional_Intro {
   }
 // CTRL + SHIFT + ENTER => complete the statement with the missing parts
   private static Optional<Discount> computeDiscount(MemberCard card) {
+    if(card == null) { // aka Defensive Programming aka Paranoid Programming
+      return Optional.empty();
+    }
     if (card.getFidelityPoints() >= 100) {
       return Optional.of(new Discount(5, Map.of()));
     }
@@ -77,7 +81,7 @@ public class Optional_Intro {
     //inside the #authorize method does NO CHECKS, {} => no-op
     //the caller might not be aware of this convention
     //    return Discount.NO_DISCOUNT;
-    return Optional.empty(); // an empty box
+   return Optional.empty(); // an empty box
   }
 
   public record Discount(int globalPercentage, Map<String, Integer> categoryDiscounts) {
