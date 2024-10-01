@@ -19,7 +19,13 @@ public class Optional_Intro {
 
   public static String getDiscountLine(Customer customer) {
     //enjoy the new Java 17 feature, wonderful exception message of NPE
-      return "You got a discount of %" + computeDiscount(customer.getMemberCard()).globalPercentage();
+    Discount discount = computeDiscount(customer.getMemberCard());
+    if (discount != null) {
+      return "You got a discount of %" + discount.globalPercentage();
+    }
+    else {
+      return "No discount for you";
+    }
   }
 
   private static Discount computeDiscount(MemberCard card) {
