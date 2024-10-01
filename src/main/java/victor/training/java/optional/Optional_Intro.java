@@ -55,16 +55,20 @@ public class Optional_Intro {
     /*    return computeDiscount(customer.getMemberCard())
             .map(d -> "You got a discountOptional of %" + d.globalPercentage()) // only executed if the box is full
             .orElse("Earn more points to get a discountOptional");*/
-      return computeDiscount(customer.getMemberCard())
+    Optional<MemberCard> memberCard = customer.getMemberCard();
+    Optional<Optional<Discount>> discount = memberCard.map(Optional_Intro::computeDiscount);
+//    flatMap  for 1 - wrapping
+    Optional<Discount> discountOptional = memberCard.flatMap(Optional_Intro::computeDiscount);
+    return discountOptional
               .map(Discount::globalPercentage)
               .map("You got a discount of %%%d"::formatted)
               .orElse("Earn more points to get a discount");
   }
 // CTRL + SHIFT + ENTER => complete the statement with the missing parts
   private static Optional<Discount> computeDiscount(MemberCard card) {
-    if(card == null) { // aka Defensive Programming aka Paranoid Programming
-      return Optional.empty();
-    }
+//    if(card == null) { // aka Defensive Programming aka Paranoid Programming
+//      return Optional.empty();
+//    }
     if (card.getFidelityPoints() >= 100) {
       return Optional.of(new Discount(5, Map.of()));
     }
