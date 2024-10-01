@@ -1,23 +1,52 @@
 package victor.training.java.optional;
 
+import java.util.Objects;
+import java.util.Optional;
+
+import static java.util.Objects.requireNonNull;
+
 public class Optional_Chain {
   private static final MyMapper mapper = new MyMapper();
 
   public static void main(String[] args) {
     Parcel parcel = new Parcel();
-    parcel.setDelivery(new Delivery(new Address(new ContactPerson("John"))));
+   // parcel.setDelivery(new Delivery(new Address(new ContactPerson("John"))));
     //    parcel.setDelivery(new Delivery(new Address(null)));
     //    parcel.setDelivery(null);
 
     DeliveryDto dto = mapper.convert(parcel);
-    System.out.println(dto);
+    System.out.println(dto.recipientPerson);
   }
 }
 
 class MyMapper {
   public DeliveryDto convert(Parcel parcel) {
     DeliveryDto dto = new DeliveryDto();
-    dto.recipientPerson = parcel.getDelivery().getAddress().getContactPerson().getName().toUpperCase();
+//    We can step on so many null pointer exceptions,
+//    correct all of these dots can cause there are five possible reasons to get a new pointer exception in a single freaking language.
+    // in order to avoid to checks for nulls, we need to talk with Business Analysts and Product Owners to understand the business rules
+//    if(parcel != null && // # life in legacy code; terror; reality: half of these properties required
+//            parcel.getDelivery() != null &&
+//            parcel.getDelivery().getAddress() != null &&
+//            parcel.getDelivery().getAddress().getContactPerson() != null) {
+//      dto.recipientPerson = parcel.getDelivery().getAddress().getContactPerson().getName().toUpperCase();
+//    }
+
+//    So what's the trick here? If you have a data model that you know much a lot about, you can enforce required fields.
+//And for those which are optional,
+// have the getter return optional of delivery
+// I'm using here a method called of nullable which depending on how your value is gonna return either empty.
+//    It wraps a valid that could be missing.
+    dto.recipientPerson = Optional.ofNullable(parcel)
+        .flatMap(Parcel::getDelivery)
+        .map(Delivery::getAddress)
+        .flatMap(Address::getContactPerson)
+        .map(ContactPerson::getName)
+        .map(String::toUpperCase)
+        .orElse("Unknown");
+
+    // a data model that TELLS you what attribute are optional and what are required
+    // burned into the model
     return dto;
   }
 }
@@ -26,11 +55,12 @@ class DeliveryDto {
   public String recipientPerson;
 }
 
+//HUGE Production Impact if we change the model
 class Parcel {
   private Delivery delivery; // NULL until a delivery is scheduled
 
-  public Delivery getDelivery() {
-    return delivery;
+  public Optional<Delivery> getDelivery() {
+    return Optional.ofNullable(delivery);
   }
 
   public void setDelivery(Delivery delivery) {
@@ -43,7 +73,7 @@ class Delivery {
   private Address address; // NOT NULL IN DB
 
   public Delivery(Address address) {
-    this.address = address;
+    this.address = requireNonNull(address);
   }
 
   public void setAddress(Address address) {
@@ -62,8 +92,8 @@ class Address {
     this.contactPerson = contactPerson;
   }
 
-  public ContactPerson getContactPerson() {
-    return contactPerson;
+  public Optional<ContactPerson> getContactPerson() {
+    return Optional.ofNullable(contactPerson);
   }
 }
 
@@ -71,7 +101,7 @@ class ContactPerson {
   private final String name; // NOT NULL
 
   public ContactPerson(String name) {
-    this.name = name;
+    this.name = requireNonNull(name);
   }
 
   public String getName() {
