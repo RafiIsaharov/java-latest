@@ -18,10 +18,17 @@ public class Biz {
          int points = customer.getMemberCard()
                  .map(MemberCard::getFidelityPoints).orElse(0);
          order.setPrice(order.getPrice() * (100 - 2 * points) / 100);
-         System.out.println("APPLIED DISCOUNT using " + customer.getMemberCard().getBarcode());
+//         System.out.println("APPLIED DISCOUNT using " + customer.getMemberCard().getBarcode());
       } else {
          System.out.println("NO DISCOUNT");
       }
    }
 }
 
+
+// when NOT to use Optional?
+// if 90% of my fields can be missing; noise is to much
+// but if you have a model in which 70% of your attributes are required.
+//Which only has a dozen of attributes.
+//If only three of them are missing and quite important, you could wrap the getters in an optional.
+//Which only has a dozen of attributes. If only three of them are missing and quite important, you could wrap the getters in an optional.
