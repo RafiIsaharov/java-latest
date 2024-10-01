@@ -55,11 +55,11 @@ public class Optional_Intro {
     /*    return computeDiscount(customer.getMemberCard())
             .map(d -> "You got a discountOptional of %" + d.globalPercentage()) // only executed if the box is full
             .orElse("Earn more points to get a discountOptional");*/
-    Optional<MemberCard> memberCard = customer.getMemberCard();
-    Optional<Optional<Discount>> discount = memberCard.map(Optional_Intro::computeDiscount);
+      //    Optional<MemberCard> memberCard = customer.getMemberCard();
+//    Optional<Optional<Discount>> discount = memberCard.map(Optional_Intro::computeDiscount);
 //    flatMap  for 1 - wrapping
-    Optional<Discount> discountOptional = memberCard.flatMap(Optional_Intro::computeDiscount);
-    return discountOptional
+      return customer.getMemberCard()
+              .flatMap(Optional_Intro::computeDiscount)
               .map(Discount::globalPercentage)
               .map("You got a discount of %%%d"::formatted)
               .orElse("Earn more points to get a discount");
