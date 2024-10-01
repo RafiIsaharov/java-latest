@@ -56,10 +56,8 @@ public class Optional_Intro {
             .orElse("Earn more points to get a discountOptional");*/
       return computeDiscount(customer.getMemberCard())
               .map(Discount::globalPercentage)
-              .map(percentage -> "You got a discountOptional of %" + percentage)
-              .orElse("Earn more points to get a discountOptional");
-
-
+              .map("You got a discount of %%%d"::formatted)
+              .orElse("Earn more points to get a discount");
   }
 // CTRL + SHIFT + ENTER => complete the statement with the missing parts
   private static Optional<Discount> computeDiscount(MemberCard card) {
