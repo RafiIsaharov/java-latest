@@ -13,3 +13,9 @@
 - Virtual threads - Project Loom & friends [21]
 
 The features above are supported since Java LTS version [ver] (expected)
+
+Java since 8 HATES checked exceptions; loves unchecked exceptions( aka RuntimeExceptions) 
+- checked exceptions = you have to handle them or declare them in the method signature,
+eg: IOException, SQLException, ClassNotFoundException
+- runtime exceptions = you can handle them, but you don't have to, 
+eg: NullPointerException, ArrayIndexOutOfBoundsException, ClassCastException
