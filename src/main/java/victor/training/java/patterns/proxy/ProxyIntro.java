@@ -1,9 +1,8 @@
 package victor.training.java.patterns.proxy;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.stereotype.Service;
 
 @SpringBootApplication
 public class ProxyIntro {
@@ -13,7 +12,9 @@ public class ProxyIntro {
         // TODO 2 : without changing anything below the line (w/o any interface)
         // TODO 3 : so that any new methods in Maths are automatically logged [hard]
         Maths maths = new Maths();
-        SecondGrade secondGrade = new SecondGrade(maths);
+        LoggingDecorator loggingDecorator = new LoggingDecorator(maths);
+//        SecondGrade secondGrade = new SecondGrade(maths);
+        SecondGrade secondGrade = new SecondGrade(loggingDecorator);
         new ProxyIntro().run(secondGrade);
         // TODO 4 : let Spring do its job, and do the same with an Aspect
 //         SpringApplication.run(ProxyIntro.class, args);
@@ -27,27 +28,45 @@ public class ProxyIntro {
 
 }
 //@Service
+@RequiredArgsConstructor
 class SecondGrade {
     private final Maths maths;
-    SecondGrade(Maths maths) {
-        this.maths = maths;
-    }
 
     public void mathClass() {
+        //all of these calls should be logged. this class is NOT aware that the sum/product methods
+        //go to the LoggingDecorator instead of Maths class, thanks to Polymorphism
         System.out.println("2+4=" + maths.sum(2, 4));
         System.out.println("1+5=" + maths.sum(1, 5));
         System.out.println("2x3=" + maths.product(2, 3));
     }
 }
 //Requirement: any method in Math class should be log its arguments
+//without changing the Math class
+//use OOP
 //@Service
-class Maths {
+//Generating a class that looks and smells and shows like your real class, but it's not.
+//But it extends it so that it can be passed as a dependency instead of your expected object.
+//It's a proxy. It's a decorator. It's a wrapper.
+@RequiredArgsConstructor
+class LoggingDecorator extends Maths {
+    private final Maths decorated;
+
+    @Override
     public int sum(int a, int b) {
         System.out.println("Summing " + a + " and " + b);
+        return decorated.sum(a, b);
+    }
+    @Override
+    public int product(int a, int b) {
+        System.out.println("Multiplying " + a + " and " + b);
+        return decorated.product(a, b);
+    }
+}
+class Maths {
+    public int sum(int a, int b) {
         return a + b;
     }
     public int product(int a, int b) {
-        System.out.println("Multiplying " + a + " and " + b);
         return a * b;
     }
 }
