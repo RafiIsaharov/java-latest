@@ -37,4 +37,14 @@ class Point {
   int x;
   int y;
 }
+//cannonical examples of such small immutable Value Objects:
+// Money{Currency:currency, BigDecimal:amount},
+// Point,
+// Color,
+// Date,
+// Range,
+// Interval,
+// Fee(TYPE, Money:money),
+// etc
+
 
