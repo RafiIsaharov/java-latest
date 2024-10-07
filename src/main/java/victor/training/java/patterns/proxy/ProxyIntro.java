@@ -26,7 +26,7 @@ public class ProxyIntro {
     }
 
 }
-
+//@Service
 class SecondGrade {
     private final Maths maths;
     SecondGrade(Maths maths) {
@@ -39,11 +39,15 @@ class SecondGrade {
         System.out.println("2x3=" + maths.product(2, 3));
     }
 }
+//Requirement: any method in Math class should be log its arguments
+//@Service
 class Maths {
     public int sum(int a, int b) {
+        System.out.println("Summing " + a + " and " + b);
         return a + b;
     }
     public int product(int a, int b) {
+        System.out.println("Multiplying " + a + " and " + b);
         return a * b;
     }
 }
