@@ -2,7 +2,6 @@ package victor.training.java.records;
 
 import jakarta.validation.Validator;
 import jakarta.validation.constraints.Min;
-import lombok.Value;
 
 import java.util.Optional;
 
@@ -22,7 +21,8 @@ public class RecordsIntro {
 
     //What's wrong with setters?
 //    Well, nothing tells me that this method inside of it somewhere darker than that. It changes the state of my argument.
-    darkLogic(point);
+    Point movedPoint = darkLogic(point);
+    System.out.println(movedPoint);
 //    why Immutability?
 //    1)unexpected side effect to the state of the object (an argument)
 //     Causing Temporal Coupling with next line
@@ -33,16 +33,15 @@ public class RecordsIntro {
     System.out.println(point.x());// getter in record does not have the "get" prefix
   }
 
-  private static void darkLogic(Point point) {
-    darkerPlace(point);
-
-  }
-
-  private static void darkerPlace(Point point) {
+  private static Point darkLogic(Point point) {
     //race conditions multi-threading code can happen here
     // once we convert to immutable, we can't change the state of the object
     //point.setX(point.getX() + 1); // was quick fix TO DO remove on next sprint
+    Point newPoint =new Point(point.x()+1, point.y());
+    return newPoint;
+
   }
+
 }
 
 
