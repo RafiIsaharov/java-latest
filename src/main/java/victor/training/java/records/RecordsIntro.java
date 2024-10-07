@@ -4,7 +4,7 @@ import lombok.Value;
 
 public class RecordsIntro {
   public static void main(String[] args) {
-    Point point = new Point(1,1);
+    Point point = new Point(-1,1);
 
     //What's wrong with setters?
 //    Well, nothing tells me that this method inside of it somewhere darker than that. It changes the state of my argument.
@@ -40,9 +40,13 @@ record Point(int x, int y) {
   //  @Override public int x() { return x * 2;}
 
 Point {
-    if (x < 0 || y < 0) {
-      throw new IllegalArgumentException("Invalid point: " + this);
-    }
+//    if (x < 0 || y < 0) {
+//      throw new IllegalArgumentException("Invalid point: " + this);
+//    }
+
+  if(x<0){x=-x;}//So I was able to change the X to flip it backwards if X is less than 0, then negate X
+  //we are not re-assigned the field, we are re-assigning the argument,
+  // but rather messing up with the parameters before they are assigned to the fields
 }
   public Point mirrorOx() {
     return new Point(x, -y);// produce changed copy(mutated copy)
