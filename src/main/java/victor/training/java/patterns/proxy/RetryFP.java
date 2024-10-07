@@ -1,13 +1,18 @@
 package victor.training.java.patterns.proxy;
 
 public class RetryFP {
+  private static RandomProvider randomProvider = new DefaultRandomProvider();
+
+  public static void setRandomProvider(RandomProvider provider) {
+    randomProvider = provider;
+  }
   public static void main(String[] args) {
     retry(3, RetryFP::riskyNetworkCall);
   }
 
 //  @Retry(maxRetries = 3) from resilience4j
   public static void riskyNetworkCall() {
-    if (Math.random() < 0.8) {
+    if (randomProvider.getRandom() < 0.8) {
       throw new RuntimeException("Network error");
     }
     System.out.println("SUCCESS");
