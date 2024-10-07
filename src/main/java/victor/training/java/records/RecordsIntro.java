@@ -1,6 +1,5 @@
 package victor.training.java.records;
 
-import lombok.Data;
 import lombok.Value;
 
 public class RecordsIntro {
@@ -17,6 +16,7 @@ public class RecordsIntro {
 //    This is one of the most dramatic reasons for immutability in high complexity systems
 //    2) race conditions multi-threading code
     System.out.println(point);
+    System.out.println(point.x());// getter in record does not have the "get" prefix
   }
 
   private static void darkLogic(Point point) {
@@ -31,14 +31,26 @@ public class RecordsIntro {
   }
 }
 
-//@Data//🤬  => @ToString, @EqualsAndHashCode, @Getter, @Setter
-@Value//🥰 => @Data + all fields are final
-class Point {
-  int x;
-  int y;
-}
-//cannonical examples of such small immutable Value Objects:
 // Money{Currency:currency, BigDecimal:amount},
+//cannonical examples of such small immutable Value Objects:
+//@Data//🤬  => @ToString, @EqualsAndHashCode, @Getter, @Setter
+//@Value//🥰 => @Data + all fields are final
+record Point(int x, int y) {
+// we should not change the state of the object
+  //  @Override public int x() { return x * 2;}
+
+Point {
+    if (x < 0 || y < 0) {
+      throw new IllegalArgumentException("Invalid point: " + this);
+    }
+}
+  public Point mirrorOx() {
+    return new Point(x, -y);// produce changed copy(mutated copy)
+  }
+  public boolean isVisible() {
+    return x > 0 && y > 0;
+  }
+}
 // Point,
 // Color,
 // Date,
