@@ -44,11 +44,24 @@ class SecondGrade {
 class Maths {
     public int sum(int a, int b) {
         System.out.println("Summing " + a + " and " + b);
-        return a + b;
+        long time1 = System.currentTimeMillis();
+        try {
+            return a + b;
+        }finally {
+            long time2 = System.currentTimeMillis();
+            System.out.println("Time taken: " + (time2 - time1));
+        }
+
     }
     public int product(int a, int b) {
         System.out.println("Multiplying " + a + " and " + b);
-        return a * b;
+        long time1 = System.currentTimeMillis();
+        try {
+            return a * b;
+        }finally {
+            long time2 = System.currentTimeMillis();
+            System.out.println("Time taken: " + (time2 - time1));
+        }
     }
 }
 
