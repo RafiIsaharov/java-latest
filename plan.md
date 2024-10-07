@@ -19,3 +19,17 @@ Java since 8 HATES checked exceptions; loves unchecked exceptions( aka RuntimeEx
 eg: IOException, SQLException, ClassNotFoundException
 - runtime exceptions = you can handle them, but you don't have to, 
 eg: NullPointerException, ArrayIndexOutOfBoundsException, ClassCastException
+
+Immutable collections is the way to go in Java 
+- List.of(), Map.of(), Set.of() ,Map.ofEntries() 
+- stream() allows us to derive a new collection from an existing 
+ones without modifying the original one. 
+But there is a trick if you need to modify an immutable collection, 
+you can only do that by cloning it and adding or removing the elements you don't like.
+if you do that in the loop you will have a performance issue.
+for example:
+List<String> list = immutableList
+for(e:otherList){ // > 1000=> you will have a performance issue
+     list = new ImmutableList(list,e)// malloc more and more memory in a loop
+    myImmutable = new MyImmutable(myImmutable.x + 1,y,z)
+}
