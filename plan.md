@@ -19,7 +19,7 @@ Java since 8 HATES checked exceptions; loves unchecked exceptions( aka RuntimeEx
 eg: IOException, SQLException, ClassNotFoundException
 - runtime exceptions = you can handle them, but you don't have to, 
 eg: NullPointerException, ArrayIndexOutOfBoundsException, ClassCastException
-
+__________________________________________________________
 Immutable collections is the way to go in Java 
 - List.of(), Map.of(), Set.of() ,Map.ofEntries() 
 - stream() allows us to derive a new collection from an existing 
@@ -33,3 +33,9 @@ for(e:otherList){ // > 1000=> you will have a performance issue
      list = new ImmutableList(list,e)// malloc more and more memory in a loop
     myImmutable = new MyImmutable(myImmutable.x + 1,y,z)
 }
+__________________________________________________________________
+AOP - Aspect Oriented Programming - come to resolve the cross-cutting concerns, mean the concerns that are spread across the application,
+Does this cost-cutting concern is something that you want to do over and over and over again in many, many places.
+If the answer is yes, then you should consider using AOP aka Proxy.
+
+AOP is a programming paradigm that aims to increase modularity by allowing the separation of cross-cutting concerns.
