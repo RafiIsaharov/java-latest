@@ -3,6 +3,13 @@ package victor.training.java.patterns.proxy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cglib.proxy.Callback;
+import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.MethodInterceptor;
+import org.springframework.cglib.proxy.MethodProxy;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
 
 @SpringBootApplication
 public class ProxyIntro {
@@ -11,10 +18,29 @@ public class ProxyIntro {
         // TODO 1 : LOG the arguments of any invocation of a method in Maths w/ decorator
         // TODO 2 : without changing anything below the line (w/o any interface)
         // TODO 3 : so that any new methods in Maths are automatically logged [hard]
-        Maths maths = new Maths();
-        LoggingDecorator loggingDecorator = new LoggingDecorator(maths);
-//        SecondGrade secondGrade = new SecondGrade(maths);
-        SecondGrade secondGrade = new SecondGrade(loggingDecorator);
+        Maths realMathObject = new Maths();
+        Callback h = new MethodInterceptor() {
+            @Override
+            public Object intercept(Object obj, Method methodIntercepted, Object[] args, MethodProxy proxy) throws Throwable {
+                //this runs any method you call on the 'proxy' object (which is a Maths object) below
+                // the method called is 'methodIntercepted'
+                System.out.println("Intercepted method: " + methodIntercepted.getName() + " with args: " + Arrays.toString(args));
+//                return proxy.invokeSuper(obj, args);
+//                return methodIntercepted.invoke(realMathObject, args);
+                return proxy.invoke(realMathObject, args);
+            }
+        };
+        // java calls the intercept a 'proxy'
+        Maths proxy = (Maths) Enhancer.create(Maths.class, h);//instance of a subclass of Maths generated at runtime
+        SecondGrade secondGrade = new SecondGrade(proxy);
+        // if it's generated at runtime
+//        Maths loggingDecorator = new LoggingDecorator(realMathObject);
+//        Maths timingDecorator = new TimingDecorator(realMathObject);
+//        SecondGrade secondGrade = new SecondGrade(realMathObject);
+//        SecondGrade secondGrade = new SecondGrade(loggingDecorator);
+//      SecondGrade secondGrade = new SecondGrade(new TimingDecorator(new LoggingDecorator(new Maths())));
+//      SecondGrade secondGrade = new SecondGrade(new LoggingDecorator(new Maths()));
+//      SecondGrade secondGrade = new SecondGrade(new TimingDecorator(new Maths()));
         new ProxyIntro().run(secondGrade);
         // TODO 4 : let Spring do its job, and do the same with an Aspect
 //         SpringApplication.run(ProxyIntro.class, args);
@@ -40,15 +66,19 @@ class SecondGrade {
         System.out.println("2x3=" + maths.product(2, 3));
     }
 }
-//Requirement: any method in Math class should be log its arguments
+//REQUIREMENT: any method in Math class should be log its arguments
 //without changing the Math class
 //use OOP
 //@Service
 //Generating a class that looks and smells and shows like your real class, but it's not.
 //But it extends it so that it can be passed as a dependency instead of your expected object.
 //It's a proxy. It's a decorator. It's a wrapper.
+// frameworks can generate this class at runtime for us: example: CGLIB, ByteBuddy, Javassist, ASM, etc.
+//Spring AOP uses CGLIB by default
+
 @RequiredArgsConstructor
 class LoggingDecorator extends Maths {
+    //favor composition over inheritance means that you should prefer to use composition instead of inheritance
     private final Maths decorated;
 
     @Override
