@@ -1,11 +1,24 @@
 package victor.training.java.records;
 
+import jakarta.validation.Validator;
 import jakarta.validation.constraints.Min;
 import lombok.Value;
+
+import java.util.Optional;
 
 public class RecordsIntro {
   public static void main(String[] args) {
     Point point = new Point("-1","1");
+
+//1) manual validation:
+    Validator validator = jakarta.validation.Validation.buildDefaultValidatorFactory().getValidator();
+    validator.validate(point).forEach(System.out::println);
+
+//    2) in typical code, you would have a service method that receives a Point
+//    and the method signature says @Validated/@Valid on the param service.f(point)
+//    public void f(@Valid Point point) { // or @Validated Point point
+//    via Method interceptor (AOP) throwing an error if the object is not valid,
+
 
     //What's wrong with setters?
 //    Well, nothing tells me that this method inside of it somewhere darker than that. It changes the state of my argument.
@@ -35,12 +48,17 @@ public class RecordsIntro {
 
 //@Data//🤬  => @ToString, @EqualsAndHashCode, @Getter, @Setter
 //@Value//🥰 => @Data + all fields are final
+//record also use Generics record Point<T> (T x, T y)
+// in binary form, a record is a final class that extends java.lang.Record
 record Point(
-        @Min(0)
+        @Min(2)
         int x, // record components are final
         int y) implements Comparable<Point> {
-// we should not change the state of the object
+
+  //🥵 we should not change the state of the object
   //  @Override public int x() { return x * 2;}
+  //🤬 can't change the getter return type or signature
+  //@Override public Optional<Integer> x(){return Optional.of(1);}
 
 Point {
 //    if (x < 0 || y < 0) {
@@ -85,5 +103,16 @@ Point (String x, String y) {
 // Interval,
 // Fee(TYPE, Money:money),
 // etc
-
+record Transaction(
+        String from,
+        String to,
+        int amount,
+        Optional<Double> fee) {
+//  @Override
+//  you cannot change the signature of the getter instead pass Optional<Double> fee
+//  public Optional<Double> fee() {
+//    return Optional.ofNullable(fee);
+//  }
+}
+// the fee will be NULL!!!!!!!! yeeeewwwwww
 
