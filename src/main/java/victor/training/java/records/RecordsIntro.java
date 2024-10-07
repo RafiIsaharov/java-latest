@@ -1,10 +1,11 @@
 package victor.training.java.records;
 
+import jakarta.validation.constraints.Min;
 import lombok.Value;
 
 public class RecordsIntro {
   public static void main(String[] args) {
-    Point point = new Point(-1,1);
+    Point point = new Point("-1","1");
 
     //What's wrong with setters?
 //    Well, nothing tells me that this method inside of it somewhere darker than that. It changes the state of my argument.
@@ -31,11 +32,13 @@ public class RecordsIntro {
   }
 }
 
-// Money{Currency:currency, BigDecimal:amount},
-//cannonical examples of such small immutable Value Objects:
+
 //@Data//🤬  => @ToString, @EqualsAndHashCode, @Getter, @Setter
 //@Value//🥰 => @Data + all fields are final
-record Point(int x, int y) {
+record Point(
+        @Min(0)
+        int x, // record components are final
+        int y) implements Comparable<Point> {
 // we should not change the state of the object
   //  @Override public int x() { return x * 2;}
 
@@ -48,6 +51,24 @@ Point {
   //we are not re-assigned the field, we are re-assigning the argument,
   // but rather messing up with the parameters before they are assigned to the fields
 }
+//Overloaded constructor MUST call the canonical constructor on the first line
+//canonical examples of such small immutable Value Objects:
+// try to avoid overloaded constructors, and instead create static factory methods
+Point (String x, String y) {
+  this(Integer.parseInt(x), Integer.parseInt(y));
+}
+
+  @Override
+  public int compareTo(Point o) {
+    return Integer.compare(x, o.x);
+  }
+
+  public static Point of(String x, String y) {//🤩 static factory method
+  int x1 = Integer.parseInt(x);
+  int y1 = Integer.parseInt(y);
+  return new Point(x1, y1);// call the canonical constructor
+}
+
   public Point mirrorOx() {
     return new Point(x, -y);// produce changed copy(mutated copy)
   }
@@ -55,6 +76,8 @@ Point {
     return x > 0 && y > 0;
   }
 }
+//canonical examples of such small immutable Value Objects:
+// Money{Currency:currency, BigDecimal:amount},
 // Point,
 // Color,
 // Date,
