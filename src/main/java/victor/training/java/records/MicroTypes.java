@@ -18,24 +18,34 @@ import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class MicroTypes {
-
-   public Map<Long, Set<Tuple2<String, Integer>>> extremeFP() {
+//primitive obsession - bad habit of using primitives instead of domain types, like String, int, boolean
+//   instead use domain types like Email, Age, Money, etc. with proper validation and behavior
+   public Map<CustomerId, Set<ProductCount>> extremeFP() {
       Long customerId = 1L;
       Integer product1Count = 2;
       Integer product2Count = 4;
-      return Map.of(customerId, Set.of(
-          Tuple.tuple("Table", product1Count),
-          Tuple.tuple("Chair", product2Count)
+      return Map.of(new CustomerId(customerId), Set.of(
+         new ProductCount(
+                 "Table", product1Count),
+          new ProductCount(
+                  "Chair", product2Count)
       ));
    }
-   
+   record ProductCount(String name, int count) {}
+   //microtypes - domain types with a single field
+   record CustomerId(long id) {}
+   record IBAN(String value) {}
+   record Email(String value) {}
+   record SSN(String value) {}
+
+
    void lackOfAbstractions() {
-      Map<Long, Set<Tuple2<String, Integer>>> map = extremeFP();
+      Map<CustomerId, Set<ProductCount>> map = extremeFP();
       // 🚫Don't use 'var' above
 
-      for (Long cid : map.keySet()) {
+      for (CustomerId cid : map.keySet()) {
          String pl = map.get(cid).stream()
-             .map(t -> t.v2 + " of " + t.v1)
+             .map(t -> t.count()+ " of " + t.name())
              .collect(joining(", "));
          System.out.println("cid=" + cid + " got " + pl);
       }
