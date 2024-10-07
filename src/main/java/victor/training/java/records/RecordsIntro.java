@@ -2,13 +2,24 @@ package victor.training.java.records;
 
 import jakarta.validation.Validator;
 import jakarta.validation.constraints.Min;
+import lombok.Builder;
 
 import java.util.Optional;
 
 public class RecordsIntro {
   public static void main(String[] args) {
     Point point = new Point("-1","1");
-
+//    point = Point.of("-1", "1"); // static factory method
+    Point point2 = Point.builder() // is a workaround for the lack of named parameters in Java
+    .x(-1)
+    .y(1) // strength: you can set the fields in any order , weakness: you may forget to set a field as uou can't see the required fields
+            .build(); // it makes the name of the properties more visible
+    System.out.println(point);
+    System.out.println(point.mirrorOx());
+    System.out.println(point.isVisible());
+    System.out.println(point.compareTo(new Point(0, 0)));
+    System.out.println(point.compareTo(new Point(0, 1)));
+    System.out.println(point.compareTo(new Point(0, -1)));
 //1) manual validation:
     Validator validator = jakarta.validation.Validation.buildDefaultValidatorFactory().getValidator();
     validator.validate(point).forEach(System.out::println);
@@ -37,8 +48,7 @@ public class RecordsIntro {
     //race conditions multi-threading code can happen here
     // once we convert to immutable, we can't change the state of the object
     //point.setX(point.getX() + 1); // was quick fix TO DO remove on next sprint
-    Point newPoint =new Point(point.x()+1, point.y());
-    return newPoint;
+      return point.moveX(1);
 
   }
 
@@ -49,6 +59,7 @@ public class RecordsIntro {
 //@Value//🥰 => @Data + all fields are final
 //record also use Generics record Point<T> (T x, T y)
 // in binary form, a record is a final class that extends java.lang.Record
+@Builder // (lombok) add only on immutable objects/records of >5 fields. abuse of builder pattern
 record Point(
         @Min(2)
         int x, // record components are final
@@ -91,6 +102,10 @@ Point (String x, String y) {
   }
   public boolean isVisible() {
     return x > 0 && y > 0;
+  }
+
+  public Point moveX(int dx) {// deriving new  objects
+    return new Point(x() + dx, y());
   }
 }
 //canonical examples of such small immutable Value Objects:
