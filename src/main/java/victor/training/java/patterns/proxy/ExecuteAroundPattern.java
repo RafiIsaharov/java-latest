@@ -18,11 +18,15 @@ public class ExecuteAroundPattern {
 //    int multiply = multiply(2, 3);
 //    long t1b = System.currentTimeMillis();//# repeted code
 //    System.out.println("Computed: " + sum + " in " + (t1b - t0b) + "ms");//# repeted code
-
-
     int result = measureTime(  ()   -> sum(2,3)     );
     System.out.println("Computed: " + result);
-
+    //    int multiplyResult = measureTime(new Supplier<Integer>() {
+//      @Override
+//      public Integer get() {
+//        return multiply(2, 3);
+//      }
+//    });
+    // similar to:
     int multiplyResult = measureTime(  ()   -> multiply(2,3)     );
     System.out.println("Computed: " + multiplyResult);
 
