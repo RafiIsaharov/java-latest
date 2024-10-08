@@ -1,37 +1,49 @@
 package victor.training.java.patterns.strategy;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 
 enum CountryEnum {
-    RO, ES, FR, UK,CN
+    RO, ES, FR, UK, CN
 }
 
 record Parcel(
-    String originCountry,
-    double tobaccoValue,
-    double regularValue,
-    LocalDate date) {
+        CountryEnum originCountry,
+        double tobaccoValue,
+        double regularValue,
+        LocalDate date) {
 }
 
-@Service
-@Data
-@ConfigurationProperties(prefix = "customs")
+class Plain {
+    public static void main(String[] args) {
+        CustomsService service = new CustomsService();
+        System.out.println("Tax for (RO,100,100) = " + service.calculateCustomsTax(
+                new Parcel(CountryEnum.valueOf("RO"), 100, 100, LocalDate.now())));
+        System.out.println("Tax for (CN,100,100) = " + service.calculateCustomsTax(
+                new Parcel(CountryEnum.valueOf("CN"), 100, 100, LocalDate.now())));
+        System.out.println("Tax for (UK,100,100) = " + service.calculateCustomsTax(
+                new Parcel(CountryEnum.valueOf("UK"), 100, 100, LocalDate.now())));
+    }
+}
+
+//@Service
+//@Data
+//@ConfigurationProperties(prefix = "customs")
 class CustomsService {
     //	private Map<String, Class<? extends TaxCalculator>> calculators; // configured in application.properties 😮
-
+    //bl: parcel is a box that you can ship from one country to another by boat or plane
+    //bl: the tax is calculated based on the country of origin of the parcel
     public double calculateCustomsTax(Parcel parcel) { // UGLY API we CANNOT change
+        // a switch on a string is a code smell
+        // despite the fact that that string appears to have a finite number of values
+        // we have it as a String=> primitive obsession
         switch (parcel.originCountry()) {
-            case "UK":
+            case UK:
                 return parcel.tobaccoValue() / 2 + parcel.regularValue();
-            case "CN":
+            case CN:
                 return parcel.tobaccoValue() + parcel.regularValue();
-            case "FR":
-            case "ES": // other EU country codes...
-            case "RO":
+            case FR:
+            case ES: // other EU country codes...
+            case RO:
                 return parcel.tobaccoValue() / 3;
             default:
                 throw new IllegalArgumentException("Not a valid country ISO2 code: " + parcel.originCountry());
