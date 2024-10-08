@@ -1,5 +1,7 @@
 package victor.training.java.patterns.proxy;
 
+import java.util.function.Supplier;
+
 public class RetryFP {
   public static void main(String[] args) {
     retry(3, RetryFP::riskyNetworkCall);
@@ -24,5 +26,4 @@ public class RetryFP {
     }
     throw new RuntimeException("Failed after " + maxRetries + " retries");
   }
-
 }

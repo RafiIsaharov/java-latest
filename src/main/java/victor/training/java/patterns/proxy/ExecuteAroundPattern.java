@@ -54,9 +54,9 @@ public class ExecuteAroundPattern {
 //  }
 
 
-  @SneakyThrows
+  //@SneakyThrows
   public static int sum(int a, int b) {
-    ThreadUtils.sleep(ofSeconds(1));
+   // ThreadUtils.sleep(ofSeconds(1));
     return a + b;
   }
   public static int multiply(int a, int b) {
