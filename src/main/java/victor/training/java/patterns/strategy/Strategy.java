@@ -17,12 +17,18 @@ record Parcel(
 class Plain {
     public static void main(String[] args) {
         CustomsService service = new CustomsService();
-        System.out.println("Tax for (RO,100,100) = " + service.calculateCustomsTax(
-                new Parcel(CountryEnum.valueOf("RO"), 100, 100, LocalDate.now())));
-        System.out.println("Tax for (CN,100,100) = " + service.calculateCustomsTax(
-                new Parcel(CountryEnum.valueOf("CN"), 100, 100, LocalDate.now())));
-        System.out.println("Tax for (UK,100,100) = " + service.calculateCustomsTax(
-                new Parcel(CountryEnum.valueOf("IN"), 100, 100, LocalDate.now())));
+        System.out.println("Tax for (RO,100,100) = " + service.calculateCustomsTax(parse("RO")));
+        System.out.println("Tax for (CN,100,100) = " + service.calculateCustomsTax(parse("CN")));
+        System.out.println("Tax for (UK,100,100) = " + service.calculateCustomsTax(parse("In")));
+//        IllegalArgumentException: No enum constant victor.training.java.patterns.strategy.CountryEnum.ID
+//        But that exception occurs at the boundary when you pass.
+//        When you interpret the data when you construct the structure that you want to work with, not in the core logic that you have.
+//        System.out.println("Tax for (UK,100,100) = " + service.calculateCustomsTax(parse("ID")));
+
+    }
+
+    private static Parcel parse(String fromAJson) {
+        return new Parcel(CountryEnum.valueOf(fromAJson.toUpperCase()), 100, 100, LocalDate.now());
     }
 }
 
@@ -51,27 +57,30 @@ class CustomsService {
 //                // that could have been a compile time error (EARLIER💖)
 //                throw new IllegalArgumentException("Not a valid country ISO2 code: " + parcel.originCountry());
 //        }
-        double v = switch (parcel.originCountry()) {// switch expression (returns a value)
-            case UK -> calculateUKTax(parcel);
-            case CN,IN -> calculateChinaTax(parcel); // other EU country codes...
-            case FR, ES, RO -> calculateEUTax(parcel);
+        return switch (parcel.originCountry()) {// switch expression (returns a value) no break needed
+            case UK -> new UKTaxCalculator().calculateTax(parcel);
+            case CN,IN -> new ChinaTaxCalculator().calculateTax(parcel);
+            case FR, ES, RO -> new EUTaxCalculator().calculateTax(parcel);
             // compilation failer if you DON'T cover all ENUM values, you must come with well-behaved enum, build failed if you add a new enum value and you don't cover it
 //            default -> throw new IllegalArgumentException("Not a valid country ISO2 code: " + parcel.originCountry());
             //default a bad practice if you use switch as an expression on an ENUM
-
         };
-        return v;
     }
+}
 
-    private static double calculateEUTax(Parcel parcel) {
+class EUTaxCalculator{
+    public double calculateTax(Parcel parcel) {
         return parcel.tobaccoValue() / 3;
     }
-
-    private static double calculateChinaTax(Parcel parcel) {
+}
+class ChinaTaxCalculator{
+    public double calculateTax(Parcel parcel) {
         return parcel.tobaccoValue() + parcel.regularValue();
     }
+}
 
-    private static double calculateUKTax(Parcel parcel) {
+class UKTaxCalculator {
+    public double calculateTax(Parcel parcel) {
         // a colleague adds some more code here
         // a colleague adds some more code here
         // a colleague adds some more code here
