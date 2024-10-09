@@ -65,8 +65,10 @@ class CustomsService {
         };
     }
 }
+//@FunctionalInterface // optional, but tells the reader that this is a functional interface
+// that can (should) be passed as a lambda
 //calculateTax has a common contract
-interface TaxCalculator {
+interface TaxCalculator {// code smell if you define an interface that you implemented, but you never use anywhere with that
     double calculateTax(Parcel parcel);
 }
 class EUTaxCalculator implements TaxCalculator{
