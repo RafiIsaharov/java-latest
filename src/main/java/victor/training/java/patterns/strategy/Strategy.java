@@ -3,8 +3,8 @@ package victor.training.java.patterns.strategy;
 import java.time.LocalDate;
 
 enum CountryEnum {
-    RO, ES, FR, UK, CN,
-    IN
+    RO, ES, FR, UK, CN
+    ,IN
 }
 
 record Parcel(
@@ -37,20 +37,30 @@ class CustomsService {
         // a switch on a string is a code smell
         // despite the fact that that string appears to have a finite number of values
         // we have it as a String=> primitive obsession
-        switch (parcel.originCountry()) {
-            case UK:
-                return calculateUKTax(parcel);
-            case CN:
-                return calculateChinaTax(parcel);
-            case FR:
-            case ES: // other EU country codes...
-            case RO:
-                return calculateEUTax(parcel);
-            default: // this it's been with us since the 80s
-                // it's time to let go. it results in a runtime error
-                // that could have been a compile time error (EARLIER💖)
-                throw new IllegalArgumentException("Not a valid country ISO2 code: " + parcel.originCountry());
-        }
+//        switch (parcel.originCountry()) { // statement (does not return a value) this is a code smell
+//            case UK:
+//                return calculateUKTax(parcel);
+//            case CN:
+//                return calculateChinaTax(parcel);
+//            case FR:
+//            case ES: // other EU country codes...
+//            case RO:
+//                return calculateEUTax(parcel);
+//            default: // this it's been with us since the 80s
+//                // it's time to let go. it results in a runtime error
+//                // that could have been a compile time error (EARLIER💖)
+//                throw new IllegalArgumentException("Not a valid country ISO2 code: " + parcel.originCountry());
+//        }
+        double v = switch (parcel.originCountry()) {// switch expression (returns a value)
+            case UK -> calculateUKTax(parcel);
+            case CN -> calculateChinaTax(parcel); // other EU country codes...
+            case FR, ES, RO -> calculateEUTax(parcel);
+            // compilation failer if you DON'T cover all ENUM values, you must come with well-behaved enum, build failed if you add a new enum value and you don't cover it
+//            default -> throw new IllegalArgumentException("Not a valid country ISO2 code: " + parcel.originCountry());
+            //default a bad practice if you use switch as an expression on an ENUM
+
+        };
+        return v;
     }
 
     private static double calculateEUTax(Parcel parcel) {
