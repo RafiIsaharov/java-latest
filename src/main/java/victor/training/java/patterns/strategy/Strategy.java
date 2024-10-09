@@ -53,7 +53,7 @@ class CustomsService {
 //        }
         double v = switch (parcel.originCountry()) {// switch expression (returns a value)
             case UK -> calculateUKTax(parcel);
-            case CN -> calculateChinaTax(parcel); // other EU country codes...
+            case CN,IN -> calculateChinaTax(parcel); // other EU country codes...
             case FR, ES, RO -> calculateEUTax(parcel);
             // compilation failer if you DON'T cover all ENUM values, you must come with well-behaved enum, build failed if you add a new enum value and you don't cover it
 //            default -> throw new IllegalArgumentException("Not a valid country ISO2 code: " + parcel.originCountry());
