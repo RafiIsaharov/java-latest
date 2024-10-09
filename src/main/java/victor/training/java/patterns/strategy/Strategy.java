@@ -3,7 +3,8 @@ package victor.training.java.patterns.strategy;
 import java.time.LocalDate;
 
 enum CountryEnum {
-    RO, ES, FR, UK, CN
+    RO, ES, FR, UK, CN,
+    IN
 }
 
 record Parcel(
@@ -21,7 +22,7 @@ class Plain {
         System.out.println("Tax for (CN,100,100) = " + service.calculateCustomsTax(
                 new Parcel(CountryEnum.valueOf("CN"), 100, 100, LocalDate.now())));
         System.out.println("Tax for (UK,100,100) = " + service.calculateCustomsTax(
-                new Parcel(CountryEnum.valueOf("UK"), 100, 100, LocalDate.now())));
+                new Parcel(CountryEnum.valueOf("IN"), 100, 100, LocalDate.now())));
     }
 }
 
@@ -45,7 +46,9 @@ class CustomsService {
             case ES: // other EU country codes...
             case RO:
                 return calculateEUTax(parcel);
-            default:
+            default: // this it's been with us since the 80s
+                // it's time to let go. it results in a runtime error
+                // that could have been a compile time error (EARLIER💖)
                 throw new IllegalArgumentException("Not a valid country ISO2 code: " + parcel.originCountry());
         }
     }
