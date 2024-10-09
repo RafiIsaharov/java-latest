@@ -5,19 +5,19 @@ import java.util.Map;
 import java.util.function.Function;
 
 enum CountryEnum {
-    RO{
-//        DOABLE but weired
-        @Override
-        public void method() {
-            System.out.println("OMG!!! I'm a method in an enum");
-        }
-    },
-    ES,
-    FR,
-    UK,
-    CN
-    ,IN;
-    public abstract void method();
+    RO(EUTaxCalculator::calculateTax),
+    ES(EUTaxCalculator::calculateTax),//it produces coupling between the enum and that EUTaxCalculator
+    //produces coupling, and it's a bit mysterious coupling.
+    FR(EUTaxCalculator::calculateTax),
+    UK(UKTaxCalculator::calculateTax),
+    CN(ChinaTaxCalculator::calculateTax),
+    IN(ChinaTaxCalculator::calculateTax);
+
+    public final TaxCalculator calculateTax;
+    CountryEnum(TaxCalculator calculateTax) {
+        this.calculateTax = calculateTax;
+    }
+
     static CountryEnum fromIso(String fromAJson) {
         return valueOf(fromAJson.toUpperCase());
     }
@@ -74,8 +74,8 @@ class CustomsService {
 //                // that could have been a compile time error (EARLIER💖)
 //                throw new IllegalArgumentException("Not a valid country ISO2 code: " + parcel.originCountry());
 //        }
-//        var calculator = selectTaxCalculator(parcel.originCountry());
-        var calculator = calculators.get(parcel.originCountry());
+        var calculator = selectTaxCalculator(parcel.originCountry());
+//        var calculator = calculators.get(parcel.originCountry());
         return calculator.calculateTax(parcel);
     }
     private static final Map<CountryEnum, TaxCalculator> calculators = Map.of(
@@ -87,7 +87,8 @@ class CustomsService {
             CountryEnum.RO, EUTaxCalculator::calculateTax
     );
     private static TaxCalculator selectTaxCalculator(CountryEnum originalCountry) {//it's a factory method
-        return calculators.get(originalCountry);
+        return originalCountry.calculateTax;
+//        return calculators.get(originalCountry);
 //        return switch (originalCountry) {// switch expression (returns a value) no break needed
 //            case UK -> UKTaxCalculator::calculateTax; // Functional Programming - functions are first class citizens - you can pass them around
 //            case CN, IN -> ChinaTaxCalculator::calculateTax;
