@@ -1,6 +1,7 @@
 package victor.training.java.patterns.strategy;
 
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.function.Function;
 
 enum CountryEnum {
@@ -58,17 +59,26 @@ class CustomsService {
 //                // that could have been a compile time error (EARLIER💖)
 //                throw new IllegalArgumentException("Not a valid country ISO2 code: " + parcel.originCountry());
 //        }
-        var calculator = selectTaxCalculator(parcel.originCountry());
+//        var calculator = selectTaxCalculator(parcel.originCountry());
+        var calculator = calculators.get(parcel.originCountry());
         return calculator.calculateTax(parcel);
     }
-
+    private static final Map<CountryEnum, TaxCalculator> calculators = Map.of(
+            CountryEnum.UK, UKTaxCalculator::calculateTax,
+            CountryEnum.CN, ChinaTaxCalculator::calculateTax,
+            CountryEnum.IN, ChinaTaxCalculator::calculateTax,
+            CountryEnum.FR, EUTaxCalculator::calculateTax,
+            CountryEnum.ES, EUTaxCalculator::calculateTax,
+            CountryEnum.RO, EUTaxCalculator::calculateTax
+    );
     private static TaxCalculator selectTaxCalculator(CountryEnum originalCountry) {//it's a factory method
-        return switch (originalCountry) {// switch expression (returns a value) no break needed
-            case UK -> new UKTaxCalculator();
-            case CN, IN -> new ChinaTaxCalculator();
-            case FR, ES, RO -> new EUTaxCalculator();
-            //default a bad practice if you use switch as an expression on an ENUM
-        };
+        return calculators.get(originalCountry);
+//        return switch (originalCountry) {// switch expression (returns a value) no break needed
+//            case UK -> UKTaxCalculator::calculateTax; // Functional Programming - functions are first class citizens - you can pass them around
+//            case CN, IN -> ChinaTaxCalculator::calculateTax;
+//            case FR, ES, RO -> EUTaxCalculator::calculateTax;
+//            //default a bad practice if you use switch as an expression on an ENUM
+//        };
     }
     {
         //TaxCalculator c = ?? ->??;
@@ -78,16 +88,17 @@ class CustomsService {
                 return EUTaxCalculator.calculateTax(parcel);
             }
         };
-        TaxCalculator c1 = (Parcel parcel) -> { return EUTaxCalculator.calculateTax(parcel)};
-        TaxCalculator c2 = (parcel) -> { return EUTaxCalculator.calculateTax(parcel)};
+        TaxCalculator c1 = (Parcel parcel) -> { return EUTaxCalculator.calculateTax(parcel);};
+        TaxCalculator c2 = (parcel) -> { return EUTaxCalculator.calculateTax(parcel);};
         TaxCalculator c3 = (parcel) -> EUTaxCalculator.calculateTax(parcel);
         TaxCalculator c4 = parcel -> EUTaxCalculator.calculateTax(parcel);
         TaxCalculator c5= EUTaxCalculator::calculateTax;
+        // having a custom defined interface rather than using Function interface is better. It's more semantic reach rich.
         Function<Parcel, Double> f = EUTaxCalculator::calculateTax; //target typing in Java - the compiler can infer the type of the lambda
         // expression from the context in which it is used
     }
 }
-//@FunctionalInterface // optional, but tells the reader that this is a functional interface
+@FunctionalInterface // optional, but tells the reader that this is a functional interface
 // that can (should) be passed as a lambda
 //calculateTax has a common contract
 interface TaxCalculator {// code smell if you define an interface that you implemented, but you never use anywhere with that
@@ -98,14 +109,14 @@ class EUTaxCalculator /*implements TaxCalculator*/{
         return parcel.tobaccoValue() / 3;
     }
 }
-class ChinaTaxCalculator implements TaxCalculator{
-    public double calculateTax(Parcel parcel) {
+class ChinaTaxCalculator{
+    public static double calculateTax(Parcel parcel) {
         return parcel.tobaccoValue() + parcel.regularValue();
     }
 }
 
-class UKTaxCalculator implements TaxCalculator{
-    public double calculateTax(Parcel parcel) {
+class UKTaxCalculator{
+    public static double calculateTax(Parcel parcel) {
         // a colleague adds some more code here
         // a colleague adds some more code here
         // a colleague adds some more code here
