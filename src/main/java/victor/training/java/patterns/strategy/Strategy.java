@@ -61,25 +61,26 @@ class CustomsService {
             case UK -> new UKTaxCalculator().calculateTax(parcel);
             case CN,IN -> new ChinaTaxCalculator().calculateTax(parcel);
             case FR, ES, RO -> new EUTaxCalculator().calculateTax(parcel);
-            // compilation failer if you DON'T cover all ENUM values, you must come with well-behaved enum, build failed if you add a new enum value and you don't cover it
-//            default -> throw new IllegalArgumentException("Not a valid country ISO2 code: " + parcel.originCountry());
             //default a bad practice if you use switch as an expression on an ENUM
         };
     }
 }
-
-class EUTaxCalculator{
+//calculateTax has a common contract
+interface TaxCalculator {
+    double calculateTax(Parcel parcel);
+}
+class EUTaxCalculator implements TaxCalculator{
     public double calculateTax(Parcel parcel) {
         return parcel.tobaccoValue() / 3;
     }
 }
-class ChinaTaxCalculator{
+class ChinaTaxCalculator implements TaxCalculator{
     public double calculateTax(Parcel parcel) {
         return parcel.tobaccoValue() + parcel.regularValue();
     }
 }
 
-class UKTaxCalculator {
+class UKTaxCalculator implements TaxCalculator{
     public double calculateTax(Parcel parcel) {
         // a colleague adds some more code here
         // a colleague adds some more code here
