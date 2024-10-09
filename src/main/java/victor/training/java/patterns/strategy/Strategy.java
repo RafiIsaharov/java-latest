@@ -5,8 +5,22 @@ import java.util.Map;
 import java.util.function.Function;
 
 enum CountryEnum {
-    RO, ES, FR, UK, CN
-    ,IN
+    RO{
+//        DOABLE but weired
+        @Override
+        public void method() {
+            System.out.println("OMG!!! I'm a method in an enum");
+        }
+    },
+    ES,
+    FR,
+    UK,
+    CN
+    ,IN;
+    public abstract void method();
+    static CountryEnum fromIso(String fromAJson) {
+        return valueOf(fromAJson.toUpperCase());
+    }
 }
 
 record Parcel(
@@ -30,8 +44,9 @@ class Plain {
     }
 
     private static Parcel parse(String fromAJson) {
-        return new Parcel(CountryEnum.valueOf(fromAJson.toUpperCase()), 100, 100, LocalDate.now());
+        return new Parcel(CountryEnum.fromIso(fromAJson), 100, 100, LocalDate.now());
     }
+
 }
 
 //@Service
