@@ -1,6 +1,7 @@
 package victor.training.java.patterns.strategy;
 
 import java.time.LocalDate;
+import java.util.function.Function;
 
 enum CountryEnum {
     RO, ES, FR, UK, CN
@@ -69,6 +70,22 @@ class CustomsService {
             //default a bad practice if you use switch as an expression on an ENUM
         };
     }
+    {
+        //TaxCalculator c = ?? ->??;
+        TaxCalculator c = new TaxCalculator() {
+            @Override
+            public double calculateTax(Parcel parcel) {
+                return EUTaxCalculator.calculateTax(parcel);
+            }
+        };
+        TaxCalculator c1 = (Parcel parcel) -> { return EUTaxCalculator.calculateTax(parcel)};
+        TaxCalculator c2 = (parcel) -> { return EUTaxCalculator.calculateTax(parcel)};
+        TaxCalculator c3 = (parcel) -> EUTaxCalculator.calculateTax(parcel);
+        TaxCalculator c4 = parcel -> EUTaxCalculator.calculateTax(parcel);
+        TaxCalculator c5= EUTaxCalculator::calculateTax;
+        Function<Parcel, Double> f = EUTaxCalculator::calculateTax; //target typing in Java - the compiler can infer the type of the lambda
+        // expression from the context in which it is used
+    }
 }
 //@FunctionalInterface // optional, but tells the reader that this is a functional interface
 // that can (should) be passed as a lambda
@@ -76,8 +93,8 @@ class CustomsService {
 interface TaxCalculator {// code smell if you define an interface that you implemented, but you never use anywhere with that
     double calculateTax(Parcel parcel);
 }
-class EUTaxCalculator implements TaxCalculator{
-    public double calculateTax(Parcel parcel) {
+class EUTaxCalculator /*implements TaxCalculator*/{
+    public static double calculateTax(Parcel parcel) {
         return parcel.tobaccoValue() / 3;
     }
 }
