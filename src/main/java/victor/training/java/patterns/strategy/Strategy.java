@@ -57,10 +57,15 @@ class CustomsService {
 //                // that could have been a compile time error (EARLIER💖)
 //                throw new IllegalArgumentException("Not a valid country ISO2 code: " + parcel.originCountry());
 //        }
-        return switch (parcel.originCountry()) {// switch expression (returns a value) no break needed
-            case UK -> new UKTaxCalculator().calculateTax(parcel);
-            case CN,IN -> new ChinaTaxCalculator().calculateTax(parcel);
-            case FR, ES, RO -> new EUTaxCalculator().calculateTax(parcel);
+        var calculator = selectTaxCalculator(parcel.originCountry());
+        return calculator.calculateTax(parcel);
+    }
+
+    private static TaxCalculator selectTaxCalculator(CountryEnum originalCountry) {//it's a factory method
+        return switch (originalCountry) {// switch expression (returns a value) no break needed
+            case UK -> new UKTaxCalculator();
+            case CN, IN -> new ChinaTaxCalculator();
+            case FR, ES, RO -> new EUTaxCalculator();
             //default a bad practice if you use switch as an expression on an ENUM
         };
     }
