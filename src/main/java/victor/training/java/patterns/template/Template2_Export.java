@@ -51,7 +51,11 @@ class FileExporter {
             System.out.println("Pretend: Metrics: Export finished in: " + (t1 - t0));
         }
     }
-
+    // Java sucks because it allows you to override any public you inherited from your SuperClass!
+    // we don't know if the subclass will call this method or not
+    // other languages like C# or Kotlin have the 'final' keyword to prevent this
+    // the code misslead the reader, because the method override the method from the superclass
+    //but who knows if the subclass will call this method or not
     protected void writeContents(Writer writer) throws IOException {
         writer.write("OrderID;CustomerId;Amount\n");//header
         //body
