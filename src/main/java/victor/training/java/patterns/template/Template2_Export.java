@@ -3,9 +3,12 @@ package victor.training.java.patterns.template;
 import lombok.RequiredArgsConstructor;
 import victor.training.java.patterns.template.support.Order;
 import victor.training.java.patterns.template.support.OrderRepo;
+import victor.training.java.patterns.template.support.Product;
+import victor.training.java.patterns.template.support.ProductRepo;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Writer;
 import java.util.Objects;
 
@@ -14,45 +17,47 @@ public class Template2_Export {
     private final FileExporter exporter;
 
     public void exportOrders() throws Exception {
-        exporter.exportOrders();
+        exporter.exportOrders("orders.csv");
     }
 
     public void exportProducts() throws Exception {
         // TODO 'the same way you did the export of orders'
         // RUN UNIT TESTS!
+        exporter.exportOrders("product.csv");
     }
 }
 
-
+@RequiredArgsConstructor
 class FileExporter {
     private final OrderRepo orderRepo;
     private final File exportFolder;
 
-    public FileExporter(OrderRepo orderRepo, File exportFolder) {
-        this.orderRepo = orderRepo;
-        this.exportFolder = exportFolder;
-    }
-
-    public File exportOrders() {
-        File file = new File(exportFolder, "orders.csv");
+    public File exportOrders(String fileName) {
+        File file = new File(exportFolder, fileName);
         long t0 = System.currentTimeMillis();
-        try (Writer writer = new FileWriter(file)) {
+        try (Writer writer = new FileWriter(file)) { // try-with-resources java 7
             System.out.println("Starting export to: " + file.getAbsolutePath());
-
-            writer.write("OrderID;Date\n");
-
-            for (Order order : orderRepo.findByActiveTrue()) {
-                String csv = order.id() + ";" + order.customerId() + ";" + order.amount() + "\n";
-                writer.write(csv);
-            }
-
+//-----------------new logic for product should be changed --------------------------------
+            // we can use passing lambda to the method as a behavior
+            writeContents(writer);
+//-------------------------------------------------
             System.out.println("File export completed: " + file.getAbsolutePath());
             return file;
         } catch (Exception e) {
             System.out.println("Pretend: Send Error Notification Email"); // TODO CR: only for export orders, not for products
             throw new RuntimeException("Error exporting data", e);
         } finally {
-            System.out.println("Pretend: Metrics: Export finished in: " + (System.currentTimeMillis() - t0));
+            long t1 = System.currentTimeMillis();
+            System.out.println("Pretend: Metrics: Export finished in: " + (t1 - t0));
+        }
+    }
+
+    protected void writeContents(Writer writer) throws IOException {
+        writer.write("OrderID;CustomerId;Amount\n");//header
+        //body
+        for (Order order : orderRepo.findByActiveTrue()) {
+            String csv = order.id() + ";" + order.customerId() + ";" + order.amount() + "\n";
+            writer.write(csv);
         }
     }
 
@@ -64,4 +69,21 @@ class FileExporter {
             return Objects.toString(cellValue);
         }
     }
+}
+
+class ProdauctExporter extends FileExporter {
+    private final ProductRepo productRepo;
+    public ProdauctExporter(OrderRepo orderRepo, File exportFolder, ProductRepo productRepo) {
+        super(orderRepo, exportFolder);
+        this.productRepo = productRepo;
+    }
+    protected void writeContents(Writer writer) throws IOException {
+        writer.write("ProductID;Name;Price\n");//header
+        //body
+        for (Product product : productRepo.findAll()) {
+            String csv = product.id() + ";" + escapeCell(product.name()) + ";" + product.price() + "\n";
+            writer.write(csv);
+        }
+    }
+
 }
