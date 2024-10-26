@@ -46,7 +46,7 @@ public class Template2_Export {
 
         exporter.export("products.csv", writer -> uncheck(()->productExporter.writeContents(writer)));
     }
-
+    @FunctionalInterface
     interface ThrowingRunnable {
         void run() throws Exception;
     }
