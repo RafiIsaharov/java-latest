@@ -33,6 +33,7 @@ public class Template2_Export {
         // Java 8 hate checked exceptions, the  options  @SneakyThrows (bug in Intellij ) doesn't compile: java: incompatible thrown types java.io
         // .IOException in functional expression
         exporter.export("orders.csv", orderExporter::writeContents);
+        //    https://projectlombok.org/features/SneakyThrows
     }
 
     public void exportProducts() throws Exception {
