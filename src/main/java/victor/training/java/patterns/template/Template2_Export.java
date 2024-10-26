@@ -32,7 +32,7 @@ public class Template2_Export {
         //there is a glitch because the IOException is not caught in the export method
         // Java 8 hate checked exceptions, the  options  @SneakyThrows (bug in Intellij ) doesn't compile: java: incompatible thrown types java.io
         // .IOException in functional expression
-        exporter.export("orders.csv", orderExporter::writeContents);
+        exporter.export("orders.csv", writer -> uncheck(()->orderExporter.writeContents(writer)));
         //    https://projectlombok.org/features/SneakyThrows
     }
 
@@ -40,14 +40,32 @@ public class Template2_Export {
         // TODO 'the same way you did the export of orders'
         // RUN UNIT TESTS!
 //        new ProductExporter(FOLDER, productRepo).export("products.csv");
-        exporter.export("products.csv", writer -> {
-            try {
-                productExporter.writeContents(writer);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        // but this hard-working solution is not good enough, we need to make it more generic. as it will be used in other places
+        // we will use AOP to make it more generic, I would like a write a function to which i could pass a variable behavior as a parameter
+        // f() -> variable behavior
+
+        exporter.export("products.csv", writer -> uncheck(()->productExporter.writeContents(writer)));
     }
+
+    interface ThrowingRunnable {
+        void run() throws Exception;
+    }
+
+    private void uncheck(ThrowingRunnable r) {
+        try { // this is a same part in all exporters
+           r.run(); // variable behavior
+        } catch (Exception e) { // this is a same part in all exporters
+            throw new RuntimeException(e);
+        }
+    }
+
+//    private void uncheck(Writer writer) {
+//        try { // this is a same part in all exporters
+//            productExporter.writeContents(writer); // variable behavior
+//        } catch (IOException e) { // this is a same part in all exporters
+//            throw new RuntimeException(e);
+//        }
+//    }
 }
 
 
