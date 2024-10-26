@@ -55,6 +55,19 @@ abstract class AbstractFileExporter {
         }
     }
 
+    // Java sucks because it allows you to override any public you inherited from your Super! types
+    // other languages like C# or Kotlin don't allow this
+
+    protected abstract void writeContents(Writer writer) throws IOException;
+    //in Java 8 this signature could be Consumer<Writer> writeContents;
+    // We want to play functional programming on this and instead of relying on me being extended by others,
+    // I'm going to instead take the missing behavior as a parameter
+
+    // #1 reason to use Template Method: to allow the subclass to provide the missing behavior
+    /** Override this method if you want to encrypt the exported file */
+    protected void encryptFile(File file) { /*NOOP*/ } // the hook method
+
+    // #2 reason to use Template Method: when superclass provides some tools(methods) that the subclass can use to get the job done
     public String escapeCell(Object cellValue) {
         if (cellValue instanceof String s) {
             if (!s.contains("\n")) return s;
@@ -63,13 +76,6 @@ abstract class AbstractFileExporter {
             return Objects.toString(cellValue);
         }
     }
-
-    // Java sucks because it allows you to override any public you inherited from your Super! types
-    // other languages like C# or Kotlin don't allow this
-    protected abstract void writeContents(Writer writer) throws IOException;
-
-    /** Override this method if you want to encrypt the exported file */
-    protected void encryptFile(File file) { /*NOOP*/ } // the hook method
 }
 class OrderExporter extends AbstractFileExporter {
     private final OrderRepo orderRepo;
@@ -87,7 +93,7 @@ class OrderExporter extends AbstractFileExporter {
     protected void writeContents(Writer writer) throws IOException {
         writer.write("OrderID;CustomerId;Amount\n"); // header
         for (Order order : orderRepo.findByActiveTrue()) {// body
-            String csv = order.id() + ";" + order.customerId() + ";" + order.amount() + "\n";
+            String csv = order.id() + ";" + escapeCell(order.customerId()) + ";" + order.amount() + "\n";
             writer.write(csv);
         }
     }
