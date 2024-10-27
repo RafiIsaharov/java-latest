@@ -102,8 +102,11 @@ public class Barman {
     String beerType = "IPA";
     long t0 = currentTimeMillis();
 
-    var beer = supplyAsync(()->fetchBeer(beerType)).exceptionally(e -> new Beer("draught beer"));
-    var vodka = supplyAsync(this::fetchVodka).exceptionally(e -> new Vodka("cheap vodka"));
+    var beer = supplyAsync(()->fetchBeer(beerType));
+    beer.exceptionally(e -> new Beer("draught beer"));// does not work because you discard the
+    // new CF returned so the exceptionally is not applied.
+    // you should have used below in combine the value returned by .exceptionally
+    var vodka = supplyAsync(this::fetchVodka);
     //When you combine 2 completable futures, 2 promises, I'm using the word promise repeatedly on purpose.
     //It's a promise that something is gonna be done.
     //I'm going to combine 2 promises, 2 completable futures, 2 deferreds, 2 tasks, 2 threads, 2 async operations
@@ -114,9 +117,7 @@ public class Barman {
     //That's why it's a compatible feature. It's a promise that something is gonna be done.
     //BiFunction<Beer, Vodka, DillyDilly> dillyDillyBiFunction = (b, v) -> new DillyDilly(b, v);
 //    CompletableFuture<DillyDilly> dilly = beer.thenCombine(vodka, (b, v) -> new DillyDilly(b, v));
-    CompletableFuture<DillyDilly> dilly = beer.thenCombine(vodka, DillyDilly::new)
-            .exceptionally(e -> new DillyDilly(new Beer("draught beer"),
-                    new Vodka("cheap vodka")));
+    CompletableFuture<DillyDilly> dilly = beer.thenCombine(vodka, DillyDilly::new);
 //    var dilly = new DillyDilly(beer, vodka);
     log.info("HTTP thread blocked for {} millis", currentTimeMillis() - t0);
     return dilly;
