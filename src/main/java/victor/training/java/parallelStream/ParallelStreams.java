@@ -11,11 +11,17 @@ import static victor.training.java.Util.sleepMillis;
 @Slf4j
 public class ParallelStreams {
   public static void main(String[] args) throws ExecutionException, InterruptedException {
-    // OnAServer.otherParallelRequestsAreRunning(); // starve the shared commonPool din JVM
+     OnAServer.otherParallelRequestsAreRunning();
+      // starve the shared commonPool din JVM
+      // you met someone (another flow) that starves the commonPool even worse than you
+        // you can't control the other flows
 
-    List<Integer> list = IntStream.range(1, 100).boxed().toList();
+      List<Integer> list = IntStream.range(1, 100).boxed().toList();
 
     long t0 = System.currentTimeMillis();
+      // 1. measure (JFR profiler) where you loose most time.
+      // 2. if you loose time in a cpu work that does not hit network (Hint: most server apps are IO-bound)
+      // => use parallelStream and measure the benefit. (JFR profiling in production)
 
       var result = list.parallelStream()
                 //If you have a stream of elements and you want to filter them
