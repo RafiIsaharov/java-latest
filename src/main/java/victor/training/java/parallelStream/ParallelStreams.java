@@ -9,7 +9,7 @@ import java.util.stream.IntStream;
 import static victor.training.java.Util.sleepMillis;
 
 @Slf4j
-public class ParallelStreams {
+public class ParallelStreams {//don't use parallel stream for IO bound work
   public static void main(String[] args) throws ExecutionException, InterruptedException {
      OnAServer.otherParallelRequestsAreRunning();
       // starve the shared commonPool din JVM
