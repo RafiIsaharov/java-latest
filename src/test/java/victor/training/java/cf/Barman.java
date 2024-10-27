@@ -1,5 +1,6 @@
 package victor.training.java.cf;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,9 +41,23 @@ public class Barman {
     //Right now this is a wasteful approach. we use here 3 threads, 1 for beer, 1 for vodka, 1 for the main thread
     // we can use 2 threads, the main thread and a worker thread that will do the work of the vodka and other new thread will do the work of the beer
     DillyDilly dilly = new DillyDilly(beer, vodka);
+    auditTheDrink(dilly);// do stuff and nothing is returned, you want to run it in the background
+    //TODO Fire-and-forget
+    //TODO Handle errors
+    //TODO Callback-based non-blocking concurrency
 
     log.info("HTTP thread blocked for {} durationMillis", currentTimeMillis() - t0);
     return dilly;
+  }
+
+  @SneakyThrows
+  // like a public void processUploadFile(File) This takes 5 minutes up to one hour, you want to run that in the background.
+  //This is a traditional situation in which you want to start some process in the background.
+  public void auditTheDrink(DillyDilly dilly) {
+    //imagine: DB insert, kafka send, API call, takes time
+    log.info("Auditing the drink: {}", dilly);
+    Thread.sleep(500);
+    log.info("Audit done");
   }
 
   private static Beer warmup(Beer beer1) {
