@@ -29,13 +29,17 @@ public class Barman {
     long t0 = currentTimeMillis();
 
     // Java's CompletableFuture === JavaScript/TypeScript promises Deferred/Promise, async/await
-    CompletableFuture<Beer> cfBeer = CompletableFuture.supplyAsync(() -> fetchBeer(beerType));
+    CompletableFuture<Beer> cfBeer = CompletableFuture.supplyAsync(() -> fetchBeer(beerType)); // take 0ms
     CompletableFuture<Beer> cfWarmBeer = cfBeer.thenApply(b -> warmup(b)); // callback, when beer arrive to me from fetchBeer
     cfWarmBeer.thenAccept(b -> log.info("Drinking warm 🍺: {}", b)); // callback
-    CompletableFuture<Vodka> cfVodka = CompletableFuture.supplyAsync(this::fetchVodka);
+    CompletableFuture<Vodka> cfVodka = CompletableFuture.supplyAsync(this::fetchVodka);//take 0ms
 
-    Beer beer = cfBeer.join(); // block current thread until beer is fetched
-    Vodka vodka = cfVodka.join();// block current thread until vodka is fetched
+    Beer beer = cfBeer.join(); // block current thread until beer is fetched //take 1 sec, in RAM memory, a thread takes 0.5 MB (Thread stack size)
+    Vodka vodka = cfVodka.join();// block current thread until vodka is fetched // take 0 ms
+    //the way Java evolves the biggest bottleneck,
+    // the biggest challenge we are facing today with modern applications is reducing the memory consumption of our flows.
+    //Right now this is a wasteful approach. we use here 3 threads, 1 for beer, 1 for vodka, 1 for the main thread
+    // we can use 2 threads, the main thread and a worker thread that will do the work of the vodka and other new thread will do the work of the beer
     DillyDilly dilly = new DillyDilly(beer, vodka);
 
     log.info("HTTP thread blocked for {} durationMillis", currentTimeMillis() - t0);
