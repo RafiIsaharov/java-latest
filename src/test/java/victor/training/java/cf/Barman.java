@@ -97,13 +97,21 @@ public class Barman {
 
   //But what happens in the main thread end is that the main thread that enters this method exits the method instantaneously.
   // It does not ever have to wait anything. The HTTP thread blocked for 0 milliseconds.
+
+  // the bad news, the mess below will indeed non-block the black HTTP thread
+  // but it will still waste 2 threads for the calls.
+  // because the fetch beer/vodka methods are blocking inside a thread.
+  // The root is that I'm using a blocking library (RestTemplate, HttpClient...)
+  // to call the external services.
+  //if you want to use a non-blocking http client:
+  // use WebClient.create().get().uri("http://localhost:9999/vodka").retrieve().bodyToMono(Vodka.class).toFuture();
   public CompletableFuture<DillyDilly> drinkNonBlocking() { // non-blocking, callback-based concurrency
     // no .get or .join allowed here
     String beerType = "IPA";
     long t0 = currentTimeMillis();
 
     var beer = supplyAsync(()->fetchBeer(beerType));
-    beer.exceptionally(e -> new Beer("draught beer"));// does not work because you discard the
+//    beer.exceptionally(e -> new Beer("draught beer"));// does not work because you discard the
     // new CF returned so the exceptionally is not applied.
     // you should have used below in combine the value returned by .exceptionally
     var vodka = supplyAsync(this::fetchVodka);
@@ -118,7 +126,7 @@ public class Barman {
     //BiFunction<Beer, Vodka, DillyDilly> dillyDillyBiFunction = (b, v) -> new DillyDilly(b, v);
 //    CompletableFuture<DillyDilly> dilly = beer.thenCombine(vodka, (b, v) -> new DillyDilly(b, v));
     CompletableFuture<DillyDilly> dilly = beer.thenCombine(vodka, DillyDilly::new);
-//    var dilly = new DillyDilly(beer, vodka);
+    //dilly.thenAccept(d -> httpResponse.send(toJson(d)));// what you can imagine the web framework will do
     log.info("HTTP thread blocked for {} millis", currentTimeMillis() - t0);
     return dilly;
   }
@@ -150,6 +158,14 @@ public class Barman {
 
   private Vodka fetchVodka() {
     return rest.getForObject("http://localhost:9999/vodka", Vodka.class);
+    // if you want to use a non-blocking http client:
+    // CompletableFuture<Vodka> future = WebClient.create().get()
+    //      .uri("http://localhost:9999/vodka")
+    //      .retrieve()
+    //      .bodyToMono(Vodka.class)
+    //      .toFuture();
+    // return future; // now you can have 10K-100K requests in flight with no threads blocked.
+    // the default number of threads that Tomcat will use to handle incoming requests is 200.
   }
 
   private Beer fetchBeer(String beerType) {
