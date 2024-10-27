@@ -50,9 +50,10 @@ public class Barman {
 //    CompletableFuture.runAsync(r);//Fire-and-forget
 
     //Fire-and-forget
+    //runAsync is a new thread that run in the background, it's a fire and forget, we don't care about the result
     // the dark side here : if the audit fails, we don't know about it,It can be a problem in many cases.
     //How do fix this?
-      CompletableFuture.runAsync(()->auditTheDrink(dilly));
+    CompletableFuture<Void> cfVoid = CompletableFuture.runAsync(() -> auditTheDrink(dilly));
 
 
     //TODO Fire-and-forget
