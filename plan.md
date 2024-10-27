@@ -39,3 +39,9 @@ Does this cost-cutting concern is something that you want to do over and over an
 If the answer is yes, then you should consider using AOP aka Proxy.
 
 AOP is a programming paradigm that aims to increase modularity by allowing the separation of cross-cutting concerns.
+------------------------------------------------------
+Template Method Pattern with FP :
+1) the function I want to call expects a === Consumer<Writer>
+2) What I can reference is a function that declares to throw a checked exception === CheckedConsumer<Writer>
+I cannot pass (2) as (1) because the function signature is different
+3) What if I could convert (2) to (1) by wrapping it in a lambda that catches the exception and writes it to a Writer?
