@@ -148,8 +148,8 @@ class OrderExporter extends FileExporter {
 //    protected void encryptFile(File file) {
 //        // fun only here, for orders
 //    }
-@SneakyThrows
-public void writeContents(Writer writer) /*throws IOException*/ {
+//@SneakyThrows
+public void writeContents(Writer writer) throws IOException {
         writer.write("OrderID;CustomerId;Amount\n"); // header
         for (Order order : orderRepo.findByActiveTrue()) {// body
             String csv = order.id() + ";" + CSVUtil.escapeCell(order.customerId()) + ";" + order.amount() + "\n";
