@@ -30,7 +30,8 @@ public class Barman {
     long t0 = currentTimeMillis();
 
     // Java's CompletableFuture === JavaScript/TypeScript promises Deferred/Promise, async/await
-    CompletableFuture<Beer> cfBeer = CompletableFuture.supplyAsync(() -> fetchBeer(beerType)); // take 0ms
+    CompletableFuture<Beer> cfBeer = CompletableFuture.supplyAsync(() -> fetchBeer(beerType))
+            .exceptionally(e-> new Beer("draught beer")); // take 0ms
     CompletableFuture<Beer> cfWarmBeer = cfBeer.thenApply(b -> warmup(b)); // callback, when beer arrive to me from fetchBeer
     cfWarmBeer.thenAccept(b -> log.info("Drinking warm 🍺: {}", b)); // callback
     Vodka vodka = fetchVodka();// the initial thread handling the HTTP request (coming from Tomcat spring boot) is blocked until vodka is fetched
@@ -54,15 +55,22 @@ public class Barman {
     // the dark side here : if the audit fails, we don't know about it,It can be a problem in many cases.
     //How do fix this?
 //    try {// try catch solution to handle the exception Never do this, it's a bad practice
-      CompletableFuture<Void> cfVoid = CompletableFuture.runAsync(() -> auditTheDrink(dilly));
+//      CompletableFuture<Void> cfVoid = CompletableFuture.runAsync(() -> auditTheDrink(dilly));
+
       //1) solution
 //    cfVoid.join();// stupidly block the main thread until the audit is done,
 //    }catch (Exception e) {
 //      log.error("Audit failed", e); // never executes because the exception is thrown in the background thread
 //    }
-    //    2) solution
+    //    2) solution - Handle errors
     //add try{}catch : inside the auditTheDrink task, but with this solution you lose the context of the parent thread
-
+//  3) solution: add a Callback-base to the CompletableFuture (everything related to computable future is callback based)
+    // equivalent to the callback in the JavaScript of a catch with promises
+    //Possible outcomes. A compatible future can give you the result, or it can give you the error
+    CompletableFuture<Void> cfVoid = CompletableFuture.runAsync(() -> auditTheDrink(dilly)).exceptionally(e -> {
+      log.error("Failed to audit the drink, i was asked for beer type " + beerType, e);
+      return null;
+    });
 
     //TODO Fire-and-forget
     //TODO Handle errors
@@ -80,16 +88,16 @@ public class Barman {
 //    2) solution
     //add try{} catch inside the task, but with this solution you lose the context of the parent thread
     // if I run 2 calls in parallel then I won't know which one through that error
-    try {
+//    try {
       log.info("Auditing the drink: {}", dilly);
       Thread.sleep(500);
       if (true) {
         throw new RuntimeException("DB is down");
       }
       log.info("Audit done");
-    } catch (Exception e) {
-    log.error("Audit failed from auditTheDrink", e); // never executes because the exception is thrown in the background thread
-  }
+//    } catch (Exception e) {
+//    log.error("Audit failed from auditTheDrink", e); // never executes because the exception is thrown in the background thread
+//  }
   }
 
   private static Beer warmup(Beer beer1) {
@@ -103,9 +111,9 @@ public class Barman {
 
   private Beer fetchBeer(String beerType) {
     String type = beerType;
-//    if(true) {
-//      throw new RuntimeException("Beer is out of stock");
-//    }
+    if(true) {
+      throw new RuntimeException("Beer is out of stock");
+    }
     return rest.getForObject("http://localhost:9999/beer", Beer.class);
   }
 }
