@@ -34,7 +34,7 @@ public class Barman {
     CompletableFuture<Beer> cfWarmBeer = cfBeer.thenApply(b -> warmup(b)); // callback, when beer arrive to me from fetchBeer
     cfWarmBeer.thenAccept(b -> log.info("Drinking warm 🍺: {}", b)); // callback
     Vodka vodka = fetchVodka();// the initial thread handling the HTTP request (coming from Tomcat spring boot) is blocked until vodka is fetched
-
+    // join() > throws any exception occurred during the execution of the future
     Beer beer = cfBeer.join(); // block current thread until beer is fetched //take 1 sec, in RAM memory, a thread takes 0.5 MB (Thread stack size)
     //the way Java evolves the biggest bottleneck,
     // the biggest challenge we are facing today with modern applications is reducing the memory consumption of our flows.
@@ -54,6 +54,8 @@ public class Barman {
     // the dark side here : if the audit fails, we don't know about it,It can be a problem in many cases.
     //How do fix this?
     CompletableFuture<Void> cfVoid = CompletableFuture.runAsync(() -> auditTheDrink(dilly));
+    //1) solution
+    cfVoid.join();// stupidly block the main thread until the audit is done,
 
 
     //TODO Fire-and-forget
@@ -71,9 +73,9 @@ public class Barman {
     //imagine: DB insert, kafka send, API call, takes time
     log.info("Auditing the drink: {}", dilly);
     Thread.sleep(500);
-    if(true) {
-      throw new RuntimeException("DB is down");
-    }
+//    if(true) {
+//      throw new RuntimeException("DB is down");
+//    }
     log.info("Audit done");
   }
 
@@ -88,6 +90,9 @@ public class Barman {
 
   private Beer fetchBeer(String beerType) {
     String type = beerType;
+    if(true) {
+      throw new RuntimeException("Beer is out of stock");
+    }
     return rest.getForObject("http://localhost:9999/beer", Beer.class);
   }
 }
