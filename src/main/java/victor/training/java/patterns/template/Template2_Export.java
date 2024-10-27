@@ -89,7 +89,6 @@ public class Template2_Export {
 //            throw new RuntimeException(e);
 //        }
 //    }
-
 //    private void uncheck(Writer writer) {
 //        try { // this is a same part in all exporters
 //            productExporter.writeContents(writer); // variable behavior
@@ -149,7 +148,7 @@ class OrderExporter extends FileExporter {
 //        // fun only here, for orders
 //    }
 //@SneakyThrows
-public void writeContents(Writer writer) throws IOException {
+    public void writeContents(Writer writer) throws IOException {
         writer.write("OrderID;CustomerId;Amount\n"); // header
         for (Order order : orderRepo.findByActiveTrue()) {// body
             String csv = order.id() + ";" + CSVUtil.escapeCell(order.customerId()) + ";" + order.amount() + "\n";
