@@ -41,7 +41,20 @@ public class Barman {
     //Right now this is a wasteful approach. we use here 3 threads, 1 for beer, 1 for vodka, 1 for the main thread
     // we can use 2 threads, the main thread and a worker thread that will do the work of the vodka and other new thread will do the work of the beer
     DillyDilly dilly = new DillyDilly(beer, vodka);
-    auditTheDrink(dilly);// do stuff and nothing is returned, you want to run it in the background
+//    auditTheDrink(dilly);// do stuff and nothing is returned, you want to run it in the background
+//    I wrap this in the Lambda.
+    //Converting what's now a call into an object which will call the function and then.
+//This right now gives me void if I want to put a functional type to that, I'm going to say runnable
+//    Runnable r=()->auditTheDrink(dilly);// do stuff and nothing is returned, you want to run it in the background
+    //And then I want to hand this runable to someone to execute, run a synch
+//    CompletableFuture.runAsync(r);//Fire-and-forget
+
+    //Fire-and-forget
+    // the dark side here : if the audit fails, we don't know about it,It can be a problem in many cases.
+    //How do fix this?
+      CompletableFuture.runAsync(()->auditTheDrink(dilly));
+
+
     //TODO Fire-and-forget
     //TODO Handle errors
     //TODO Callback-based non-blocking concurrency
@@ -57,6 +70,9 @@ public class Barman {
     //imagine: DB insert, kafka send, API call, takes time
     log.info("Auditing the drink: {}", dilly);
     Thread.sleep(500);
+    if(true) {
+      throw new RuntimeException("DB is down");
+    }
     log.info("Audit done");
   }
 
