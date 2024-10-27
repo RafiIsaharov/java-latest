@@ -1,5 +1,6 @@
 package victor.training.java.cf;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -19,9 +20,11 @@ public class App {
   @Bean
   public ThreadPoolTaskExecutor poolBar() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-    executor.setCorePoolSize(20); // core == max
-    executor.setMaxPoolSize(20); // how to decide size?
-    executor.setQueueCapacity(500);// how to decide size?
+    // how many threads can be running at the same time
+    int howMuchLoadCanTheOtherApiCanTake = 50;
+    executor.setCorePoolSize(howMuchLoadCanTheOtherApiCanTake);
+    executor.setMaxPoolSize(howMuchLoadCanTheOtherApiCanTake);
+    executor.setQueueCapacity(500);
     executor.setThreadNamePrefix("bar-");
     executor.initialize();
     return executor;
