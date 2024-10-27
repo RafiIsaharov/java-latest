@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static java.lang.System.currentTimeMillis;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 @Slf4j
 @RestController
@@ -30,7 +31,7 @@ public class Barman {
     long t0 = currentTimeMillis();
 
     // Java's CompletableFuture === JavaScript/TypeScript promises Deferred/Promise, async/await
-    CompletableFuture<Beer> cfBeer = CompletableFuture.supplyAsync(() -> fetchBeer(beerType))
+    CompletableFuture<Beer> cfBeer = supplyAsync(() -> fetchBeer(beerType))
             .exceptionally(e-> new Beer("draught beer")); // take 0ms
     CompletableFuture<Beer> cfWarmBeer = cfBeer.thenApply(b -> warmup(b)); // callback, when beer arrive to me from fetchBeer
     cfWarmBeer.thenAccept(b -> log.info("Drinking warm 🍺: {}", b)); // callback
@@ -64,19 +65,60 @@ public class Barman {
 //    }
     //    2) solution - Handle errors
     //add try{}catch : inside the auditTheDrink task, but with this solution you lose the context of the parent thread
-//  3) solution: add a Callback-base to the CompletableFuture (everything related to computable future is callback based)
+//  3) solution: fallbacks via exceptionally (everything related to computable future is callback based)
     // equivalent to the callback in the JavaScript of a catch with promises
     //Possible outcomes. A compatible future can give you the result, or it can give you the error
+    //all this 3 solution lead to blocking the main thread we have 2 tread, the main thread and the worker thread 2*0.5 MB,
+    // but imagine if we have 200 threads that will be 2000*0.5 MB =  1 GB of memory wasted
+    // if you have a DB Oracle can lead to a battle neck
+//    4) solution: add a Callback-base to the CompletableFuture (everything related to computable future is callback based)
     CompletableFuture<Void> cfVoid = CompletableFuture.runAsync(() -> auditTheDrink(dilly)).exceptionally(e -> {
       log.error("Failed to audit the drink, i was asked for beer type " + beerType, e);
       return null;
     });
 
-    //TODO Fire-and-forget
-    //TODO Handle errors
+    // Fire-and-forget - done
+    // Handle errors - done
     //TODO Callback-based non-blocking concurrency
 
     log.info("HTTP thread blocked for {} durationMillis", currentTimeMillis() - t0);
+    return dilly;
+  }
+
+
+
+  @GetMapping("/drink-non-blocking")
+  //What can I return?  How? What can I give to my web framework back?
+//You can take your promise of a dilly and give that promise - CompletableFuture<DillyDilly>
+  //The web framework understands that you want it to wait for this dilly to be available
+  //In other words, you want the framework to wait for this to actually execute in the future, and both are ready, and when it's done, serialize it as a Jason.
+  //  What's happening in the browser is the exact same thing you're going to see.
+  //  The browser is going to wait for the promise to be done, and when it's done, it's going to show you the result.
+
+  //But what happens in the main thread end is that the main thread that enters this method exits the method instantaneously.
+  // It does not ever have to wait anything. The HTTP thread blocked for 0 milliseconds.
+  public CompletableFuture<DillyDilly> drinkNonBlocking() { // non-blocking, callback-based concurrency
+    // no .get or .join allowed here
+    String beerType = "IPA";
+    long t0 = currentTimeMillis();
+
+    var beer = supplyAsync(()->fetchBeer(beerType)).exceptionally(e -> new Beer("draught beer"));
+    var vodka = supplyAsync(this::fetchVodka).exceptionally(e -> new Vodka("cheap vodka"));
+    //When you combine 2 completable futures, 2 promises, I'm using the word promise repeatedly on purpose.
+    //It's a promise that something is gonna be done.
+    //I'm going to combine 2 promises, 2 completable futures, 2 deferreds, 2 tasks, 2 threads, 2 async operations
+    //When the beer promise is gonna be done, then combine that promise with the vodka
+    //It's a promise that some deal is gonna be ready in the future sometime
+    //After both beer and vodka are done. I'm going to combine them into a DillyDilly
+    //You combine the things which you don't have yet, and you get a third thing that of course you don't have yet.
+    //That's why it's a compatible feature. It's a promise that something is gonna be done.
+    //BiFunction<Beer, Vodka, DillyDilly> dillyDillyBiFunction = (b, v) -> new DillyDilly(b, v);
+//    CompletableFuture<DillyDilly> dilly = beer.thenCombine(vodka, (b, v) -> new DillyDilly(b, v));
+    CompletableFuture<DillyDilly> dilly = beer.thenCombine(vodka, DillyDilly::new)
+            .exceptionally(e -> new DillyDilly(new Beer("draught beer"),
+                    new Vodka("cheap vodka")));
+//    var dilly = new DillyDilly(beer, vodka);
+    log.info("HTTP thread blocked for {} millis", currentTimeMillis() - t0);
     return dilly;
   }
 
@@ -111,9 +153,9 @@ public class Barman {
 
   private Beer fetchBeer(String beerType) {
     String type = beerType;
-    if(true) {
-      throw new RuntimeException("Beer is out of stock");
-    }
+//    if(true) {
+//      throw new RuntimeException("Beer is out of stock");
+//    }
     return rest.getForObject("http://localhost:9999/beer", Beer.class);
   }
 }
