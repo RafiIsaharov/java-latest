@@ -53,9 +53,13 @@ public class Barman {
     //runAsync is a new thread that run in the background, it's a fire and forget, we don't care about the result
     // the dark side here : if the audit fails, we don't know about it,It can be a problem in many cases.
     //How do fix this?
-    CompletableFuture<Void> cfVoid = CompletableFuture.runAsync(() -> auditTheDrink(dilly));
-    //1) solution
-    cfVoid.join();// stupidly block the main thread until the audit is done,
+    try {// try catch solution to handle the exception Never do this, it's a bad practice
+      CompletableFuture<Void> cfVoid = CompletableFuture.runAsync(() -> auditTheDrink(dilly));
+      //1) solution
+//    cfVoid.join();// stupidly block the main thread until the audit is done,
+    }catch (Exception e) {
+      log.error("Audit failed", e); // never executes because the exception is thrown in the background thread
+    }
 
 
     //TODO Fire-and-forget
@@ -73,9 +77,9 @@ public class Barman {
     //imagine: DB insert, kafka send, API call, takes time
     log.info("Auditing the drink: {}", dilly);
     Thread.sleep(500);
-//    if(true) {
-//      throw new RuntimeException("DB is down");
-//    }
+    if(true) {
+      throw new RuntimeException("DB is down");
+    }
     log.info("Audit done");
   }
 
@@ -90,9 +94,9 @@ public class Barman {
 
   private Beer fetchBeer(String beerType) {
     String type = beerType;
-    if(true) {
-      throw new RuntimeException("Beer is out of stock");
-    }
+//    if(true) {
+//      throw new RuntimeException("Beer is out of stock");
+//    }
     return rest.getForObject("http://localhost:9999/beer", Beer.class);
   }
 }
