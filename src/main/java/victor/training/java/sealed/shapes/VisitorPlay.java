@@ -13,8 +13,15 @@ public class VisitorPlay {
                 new Square(5),
                 new Square(1));
 
-        double totalPerimeter = 0; // TASK : compute
-
+        //OOP java 8
+        double totalPerimeter = shapes.stream().mapToDouble(Shape::perimeter)
+                .sum(); // TASK : compute
+//        double totalPerimeter = 0;
+//        for(Shape shape: shapes){
+//            totalPerimeter+= shape.perimeter();
+//        }
+//        Task:
+//        I want you to compute the total perimeter of all the shapes in this list.
         // ## instanceOf
         // ## OOP (behavior next to state)
         // ## VISITOR 😱
