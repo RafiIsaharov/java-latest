@@ -20,6 +20,7 @@ public class App {
   @Bean
   public ThreadPoolTaskExecutor poolBar() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+//    executor.setThreadFactory(Thread.ofVirtual().factory()); //make no sense, just for the example
     // how many threads can be running at the same time
     int howMuchLoadCanTheOtherApiCanTake = 50;
     executor.setCorePoolSize(howMuchLoadCanTheOtherApiCanTake);

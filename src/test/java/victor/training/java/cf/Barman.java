@@ -152,6 +152,31 @@ public class Barman {
     return dilly;
   }
 
+  @GetMapping("/drink-vt")
+  public DillyDilly drinkVT() {
+    String beerType = "IPA";
+    long t0 = currentTimeMillis();
+    // +1 virtual thread for any task you give it
+    ExecutorService vtExecutor = Executors.newVirtualThreadPerTaskExecutor();
+    var beer = supplyAsync(() -> fetchBeer(beerType),
+            vtExecutor); //This executor will spawn a new thread for every task you give it,this is it's called Vt executor.
+    var vodka = supplyAsync(this::fetchVodka, vtExecutor);
+//            .exceptionally(e ->beer.cancel(true)); // if vodka fails, cancel beer
+   var dilly = new DillyDilly(beer.join(), vodka.join()); //OK because we are in a virtual thread
+    //beer.join() and vodka.join() are blocking, but they are blocking in a virtual thread, a lightweight thread, so it's OK
+    //So if when I do that join, the PT that behind VT is gonna be released and put to do something else,
+    // when that result comes back from join the then VT go into the runnable state, One PT is gonna come to VT and continue the work
+    log.info("HTTP thread blocked for {} millis", currentTimeMillis() - t0);
+    return dilly;
+    //has an issue:
+//    1. INTERRUPTING SUBTASKS
+//     - if the client disconnects, the completable futures are not interrupted
+//     - if the fetchBeer fails, the fetchVodka will not be interrupted
+//    2. TRACEABILITY
+//     - in the subtask you are not LINKED to the parent task waiting for you
+//    3. PROPAGATION OF META-DATA
+  }
+
   @SneakyThrows
   // like a public void processUploadFile(File) This takes 5 minutes up to one hour, you want to run that in the background.
   //This is a traditional situation in which you want to start some process in the background.
