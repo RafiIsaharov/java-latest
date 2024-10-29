@@ -2,7 +2,7 @@ package victor.training.java.sealed.shapes;
 
 
 public interface Shape {
-    void accept(ShapeVisitor visitor);
+//    void accept(ShapeVisitor visitor);
 //    double perimeter();
 }
 

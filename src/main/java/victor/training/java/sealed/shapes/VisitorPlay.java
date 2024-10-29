@@ -59,20 +59,23 @@ public class VisitorPlay {
         // method for each of them.
         // now create a perimeter visitor, and you have to implement the perimeter visitor for each of the shapes
 //        double totalPerimeter = 0;
-        PerimeterVisitor perimeterVisitor = new PerimeterVisitor();
+//        PerimeterVisitor perimeterVisitor = new PerimeterVisitor();
 //        This syntax I would prefer to have a loop in this case because I'm not producing anything.
         //I am not producing anything. I am doing something.So if you are doing something, don't employ lambdas
-        for(Shape shape: shapes){
-            shape.accept(perimeterVisitor);
-        }
-        double totalPerimeter = perimeterVisitor.getTotalPerimeter();
-        System.out.println(totalPerimeter);
+//        for(Shape shape: shapes){
+//            shape.accept(perimeterVisitor);
+//        }
+//        double totalPerimeter = perimeterVisitor.getTotalPerimeter();
+//
+//        AreaVisitor visitor = new AreaVisitor();
+//        for (Shape shape : shapes) {
+//            shape.accept(visitor);
+//        }
+//        double totalArea = visitor.getTotalArea();
 
-        AreaVisitor visitor = new AreaVisitor();
-        for (Shape shape : shapes) {
-            shape.accept(visitor);
-        }
-        double totalArea = visitor.getTotalArea();
+        double totalPerimeter =0;
+        double totalArea =0;
+        System.out.println(totalPerimeter);
         System.out.println(totalArea);
 
     }
