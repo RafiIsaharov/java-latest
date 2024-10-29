@@ -73,7 +73,21 @@ public class VisitorPlay {
 //        }
 //        double totalArea = visitor.getTotalArea();
 
+
+//        4. switch+sealed
+//        Java 21 introduced a new concept of a field hierarchy, which is a sealed keyword interface shape
+//        and you have to list what types you allow to implement.
+
         double totalPerimeter =0;
+        for(Shape shape: shapes){
+            totalPerimeter+= switch(shape){
+                case Square square -> 4 * square.edge();
+                case Circle circle -> 2 * Math.PI * circle.radius();
+                case Rectangle rectangle -> 2 * (rectangle.width() + rectangle.height());
+                // AVOID default, let the compiler tell you that you forgot to handle a new type
+                //default -> throw new IllegalArgumentException("Unknown shape: " + shape);
+            };
+        }
         double totalArea =0;
         System.out.println(totalPerimeter);
         System.out.println(totalArea);
