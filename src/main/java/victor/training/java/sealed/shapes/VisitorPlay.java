@@ -20,7 +20,7 @@ public class VisitorPlay {
 //        Task:
 //        I want you to compute the total perimeter of all the shapes in this list.
 
-        //1. OOP java 8
+        //1. OOP💖 java 8
         // we changed the state of the object Square, Circle
 
 //        double totalPerimeter = 0;
@@ -66,12 +66,15 @@ public class VisitorPlay {
             shape.accept(perimeterVisitor);
         }
         double totalPerimeter = perimeterVisitor.getTotalPerimeter();
-
-
-
-
-
         System.out.println(totalPerimeter);
+
+        AreaVisitor visitor = new AreaVisitor();
+        for (Shape shape : shapes) {
+            shape.accept(visitor);
+        }
+        double totalArea = visitor.getTotalArea();
+        System.out.println(totalArea);
+
     }
 }
 
